@@ -57,7 +57,7 @@ def generate_character_labels(transcripts, labels_dest):
                 label_freq.append(1)
             else:
                 label_freq[label_list.index(ch)] += 1
-
+    print(label_list, label_freq)
     # sort together Using zip
     label_freq, label_list = zip(*sorted(zip(label_freq, label_list), reverse=True))
     label = {'id': [0, 1, 2], 'char': ['<pad>', '<sos>', '<eos>'], 'freq': [0, 0, 0]}

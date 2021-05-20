@@ -19,6 +19,11 @@ import numpy as np
 import torchaudio
 from torch import Tensor
 
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+
 from kospeech.vocabs.ksponspeech import KsponSpeechVocabulary
 from kospeech.data.audio.core import load_audio
 from kospeech.models import (
@@ -47,9 +52,9 @@ def parse_audio(audio_path: str, del_silence: bool = False, audio_extension: str
 
 
 parser = argparse.ArgumentParser(description='KoSpeech')
-parser.add_argument('--model_path', type=str, require=True)
-parser.add_argument('--audio_path', type=str, require=True)
-parser.add_argument('--device', type=str, require=False, default='cpu')
+parser.add_argument('--model_path', type=str, required=True)
+parser.add_argument('--audio_path', type=str, required=True)
+parser.add_argument('--device', type=str, required=False, default='cpu')
 opt = parser.parse_args()
 
 feature = parse_audio(opt.audio_path, del_silence=True)
@@ -65,12 +70,13 @@ if isinstance(model, ListenAttendSpell):
     model.encoder.device = opt.device
     model.decoder.device = opt.device
 
-    y_hats = model.greedy_search(feature.unsqueeze(0), input_length, opt.device)
+    y_hats = model.recognize(feature.unsqueeze(0), input_length)
 elif isinstance(model, DeepSpeech2):
     model.device = opt.device
-    y_hats = model.greedy_search(feature.unsqueeze(0), input_length, opt.device)
+    feature = feature.to(opt.device)
+    y_hats = model.recognize(feature.unsqueeze(0), input_length)
 elif isinstance(model, SpeechTransformer) or isinstance(model, Jasper) or isinstance(model, Conformer):
-    y_hats = model.greedy_search(feature.unsqueeze(0), input_length, opt.device)
+    y_hats = model.recognize(feature.unsqueeze(0), input_length)
 
 sentence = vocab.label_to_string(y_hats.cpu().detach().numpy())
 print(sentence)

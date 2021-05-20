@@ -1,12 +1,12 @@
 # data
 dataset: 'kspon'
-dataset_path: ''
+dataset_path: '../../../dataset/kspon/KsponSpeech'
 transcripts_path: '../../../data/transcripts.txt'
 output_unit: 'character'
 
 # trainer
 num_epochs: 20
-batch_size: 32
+batch_size: 16
 save_result_every: 1000
 checkpoint_every: 5000
 print_every: 10

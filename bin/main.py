@@ -21,6 +21,10 @@ import hydra
 from hydra.core.config_store import ConfigStore
 from omegaconf import OmegaConf, DictConfig
 
+import sys
+
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+
 from kospeech.data.data_loader import split_dataset
 from kospeech.optim import Optimizer
 from kospeech.model_builder import build_model
@@ -65,11 +69,10 @@ from kospeech.trainer import (
     RNNTTrainConfig
 )
 
-
-KSPONSPEECH_VOCAB_PATH = '../../../data/vocab/kspon_sentencepiece.vocab'
-KSPONSPEECH_SP_MODEL_PATH = '../../../data/vocab/kspon_sentencepiece.model'
-LIBRISPEECH_VOCAB_PATH = '../../../data/vocab/tokenizer.vocab'
-LIBRISPEECH_TOKENIZER_PATH = '../../../data/vocab/tokenizer.model'
+KSPONSPEECH_VOCAB_PATH = '../data/vocab/kspon_sentencepiece.vocab'
+KSPONSPEECH_SP_MODEL_PATH = '../data/vocab/kspon_sentencepiece.model'
+LIBRISPEECH_VOCAB_PATH = '../data/vocab/tokenizer.vocab'
+LIBRISPEECH_TOKENIZER_PATH = '../data/vocab/tokenizer.model'
 
 
 def train(config: DictConfig) -> nn.DataParallel:
@@ -77,12 +80,12 @@ def train(config: DictConfig) -> nn.DataParallel:
     torch.manual_seed(config.train.seed)
     torch.cuda.manual_seed_all(config.train.seed)
     device = check_envirionment(config.train.use_cuda)
-  
+
     vocab = KsponSpeechVocabulary(
-        f'../../../data/vocab/aihub_{config.train.output_unit}_vocabs.csv',
+        f'/home/seungmin/dmount/KoSpeech/data/vocab/aihub_{config.train.output_unit}_vocabs.csv',
         output_unit=config.train.output_unit,
     )
-            
+
     if not config.train.resume:
         epoch_time_step, trainset_list, validset = split_dataset(config, config.train.transcripts_path, vocab)
         model = build_model(config, vocab, device)
@@ -146,7 +149,8 @@ cs.store(group="model", name="las", node=ListenAttendSpellConfig, package="model
 cs.store(group="model", name="transformer", node=TransformerConfig, package="model")
 cs.store(group="model", name="jasper", node=JasperConfig, package="model")
 cs.store(group="model", name="joint-ctc-attention-las", node=JointCTCAttentionLASConfig, package="model")
-cs.store(group="model", name="joint-ctc-attention-transformer", node=JointCTCAttentionTransformerConfig, package="model")
+cs.store(group="model", name="joint-ctc-attention-transformer", node=JointCTCAttentionTransformerConfig,
+         package="model")
 cs.store(group="model", name="conformer-small", node=ConformerSmallConfig, package="model")
 cs.store(group="model", name="conformer-medium", node=ConformerMediumConfig, package="model")
 cs.store(group="model", name="conformer-large", node=ConformerLargeConfig, package="model")

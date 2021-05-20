@@ -1,8 +1,8 @@
 # Author
 # Soohwan Kim, Seyoung Bae, Cheolhwang Won, Soyoung Cho, Jeongwon Kwak
 
-DATASET_PATH="SET_YOUR_DATASET_PATH"
-VOCAB_DEST='SET_LABELS_DESTINATION'
+DATASET_PATH="KsponSpeech"
+VOCAB_DEST='../../data/vocab/'
 OUTPUT_UNIT='character'                                          # you can set character / subword / grapheme
 PREPROCESS_MODE='phonetic'                                       # phonetic : 칠 십 퍼센트,  spelling : 70%
 VOCAB_SIZE=5000                                                  # if you use subword output unit, set vocab size

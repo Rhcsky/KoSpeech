@@ -39,16 +39,17 @@ class SpectrogramDataset(Dataset, SpectrogramParser):
         config (DictConfig): set of configurations
         dataset_path (str): path of dataset
     """
+
     def __init__(
             self,
-            audio_paths: list,              # list of audio paths
-            transcripts: list,              # list of transcript paths
-            sos_id: int,                    # identification of start of sequence token
-            eos_id: int,                    # identification of end of sequence token
-            config: DictConfig,             # set of arguments
-            spec_augment: bool = False,     # flag indication whether to use spec-augmentation of not
-            dataset_path: str = None,       # path of dataset,
-            audio_extension: str = 'pcm'    # audio extension
+            audio_paths: list,  # list of audio paths
+            transcripts: list,  # list of transcript paths
+            sos_id: int,  # identification of start of sequence token
+            eos_id: int,  # identification of end of sequence token
+            config: DictConfig,  # set of arguments
+            spec_augment: bool = False,  # flag indication whether to use spec-augmentation of not
+            dataset_path: str = None,  # path of dataset,
+            audio_extension: str = 'pcm'  # audio extension
     ) -> None:
         super(SpectrogramDataset, self).__init__(
             feature_extract_by=config.audio.feature_extract_by, sample_rate=config.audio.sample_rate,
@@ -69,10 +70,10 @@ class SpectrogramDataset(Dataset, SpectrogramParser):
     def get_item(self, idx):
         """ get feature vector & transcript """
         feature = self.parse_audio(os.path.join(self.dataset_path, self.audio_paths[idx]), self.augment_methods[idx])
-        
+
         if feature is None:
             return None, None
-        
+
         transcript = self.parse_transcript(self.transcripts[idx])
 
         return feature, transcript
@@ -122,6 +123,7 @@ class AudioDataLoader(threading.Thread):
         batch_size (int): size of batch
         thread_id (int): identification of thread
     """
+
     def __init__(self, dataset, queue, batch_size, thread_id, pad_id):
         threading.Thread.__init__(self)
         self.collate_fn = _collate_fn
@@ -176,6 +178,7 @@ class AudioDataLoader(threading.Thread):
 
 def _collate_fn(batch, pad_id):
     """ functions that pad to the maximum sequence length """
+
     def seq_length_(p):
         return len(p[0])
 
@@ -225,6 +228,7 @@ class MultiDataLoader(object):
         batch_size (int): size of batch
         num_workers (int): the number of cpu cores used
     """
+
     def __init__(self, dataset_list, queue, batch_size, num_workers, pad_id):
         self.dataset_list = dataset_list
         self.queue = queue

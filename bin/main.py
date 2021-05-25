@@ -82,7 +82,7 @@ def train(config: DictConfig) -> nn.DataParallel:
     device = check_envirionment(config.train.use_cuda)
 
     if config.train.num_threads and int(config.train.num_threads) > 0:
-        torch.set_num_threads(config.train.num_threads)
+       torch.set_num_threads(config.train.num_threads)
   
     vocab = KsponSpeechVocabulary(
         f'/home/seungmin/dmount/KoSpeech/data/vocab/aihub_{config.train.output_unit}_vocabs.csv',

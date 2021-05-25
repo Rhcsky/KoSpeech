@@ -35,8 +35,10 @@ from kospeech.models import (
 )
 
 
-def parse_audio(audio_path: str, del_silence: bool = False, audio_extension: str = 'pcm') -> Tensor:
+def parse_audio(audio_path: str, del_silence: bool = True, audio_extension: str = 'wav') -> Tensor:
+    # signals, time_stamps = load_audio(audio_path, del_silence, extension=audio_extension)
     signal = load_audio(audio_path, del_silence, extension=audio_extension)
+    print(len(signal))
     feature = torchaudio.compliance.kaldi.fbank(
         waveform=Tensor(signal).unsqueeze(0),
         num_mel_bins=80,
@@ -66,6 +68,8 @@ if isinstance(model, nn.DataParallel):
     model = model.module
 model.eval()
 
+feature = feature.to(opt.device)
+
 if isinstance(model, ListenAttendSpell):
     model.encoder.device = opt.device
     model.decoder.device = opt.device
@@ -73,7 +77,7 @@ if isinstance(model, ListenAttendSpell):
     y_hats = model.recognize(feature.unsqueeze(0), input_length)
 elif isinstance(model, DeepSpeech2):
     model.device = opt.device
-    feature = feature.to(opt.device)
+
     y_hats = model.recognize(feature.unsqueeze(0), input_length)
 elif isinstance(model, SpeechTransformer) or isinstance(model, Jasper) or isinstance(model, Conformer):
     y_hats = model.recognize(feature.unsqueeze(0), input_length)

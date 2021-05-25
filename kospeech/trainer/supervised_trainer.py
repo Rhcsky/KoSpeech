@@ -13,19 +13,16 @@
 # limitations under the License.
 
 import math
-import time
-import torch
-import torch.nn as nn
 import queue
-import pandas as pd
-from torch import Tensor
+import time
 from typing import Tuple
 
-from kospeech.optim import Optimizer
-from kospeech.vocabs import Vocabulary
+import pandas as pd
+import torch
+import torch.nn as nn
+from torch import Tensor
+
 from kospeech.checkpoint import Checkpoint
-from kospeech.metrics import CharacterErrorRate
-from kospeech.utils import logger
 from kospeech.criterion import (
     LabelSmoothedCrossEntropyLoss,
     JointCTCCrossEntropyLoss,
@@ -35,6 +32,10 @@ from kospeech.data import (
     AudioDataLoader,
     SpectrogramDataset,
 )
+from kospeech.metrics import CharacterErrorRate
+from kospeech.optim import Optimizer
+from kospeech.utils import logger
+from kospeech.vocabs import Vocabulary
 
 
 class SupervisedTrainer(object):
@@ -61,20 +62,20 @@ class SupervisedTrainer(object):
 
     def __init__(
             self,
-            optimizer: Optimizer,                          # optimizer for training
-            criterion: nn.Module,                          # loss function
-            trainset_list: list,                           # list of training dataset
-            validset: SpectrogramDataset,                  # validation dataset
-            num_workers: int,                              # number of threads
-            device: torch.device,                          # device - cuda or cpu
-            print_every: int,                              # number of timesteps to save result after
-            save_result_every: int,                        # nimber of timesteps to save result after
-            checkpoint_every: int,                         # number of timesteps to checkpoint after
-            teacher_forcing_step: float = 0.2,             # step of teacher forcing ratio decrease per epoch.
-            min_teacher_forcing_ratio: float = 0.8,        # minimum value of teacher forcing ratio
-            architecture: str = 'las',                     # model to train - las, transformer
-            vocab: Vocabulary = None,                      # vocabulary object
-            joint_ctc_attention: bool = False,             # flag indication whether joint CTC-Attention or not
+            optimizer: Optimizer,  # optimizer for training
+            criterion: nn.Module,  # loss function
+            trainset_list: list,  # list of training dataset
+            validset: SpectrogramDataset,  # validation dataset
+            num_workers: int,  # number of threads
+            device: torch.device,  # device - cuda or cpu
+            print_every: int,  # number of timesteps to save result after
+            save_result_every: int,  # nimber of timesteps to save result after
+            checkpoint_every: int,  # number of timesteps to checkpoint after
+            teacher_forcing_step: float = 0.2,  # step of teacher forcing ratio decrease per epoch.
+            min_teacher_forcing_ratio: float = 0.8,  # minimum value of teacher forcing ratio
+            architecture: str = 'las',  # model to train - las, transformer
+            vocab: Vocabulary = None,  # vocabulary object
+            joint_ctc_attention: bool = False,  # flag indication whether joint CTC-Attention or not
     ) -> None:
         self.num_workers = num_workers
         self.optimizer = optimizer
@@ -104,13 +105,13 @@ class SupervisedTrainer(object):
                                    "elapsed: {:.2f}s {:.2f}m {:.2f}h, lr: {:.6f}"
 
     def train(
-        self,
-        model: nn.Module,                           # model to train
-        batch_size: int,                            # batch size for experiment
-        epoch_time_step: int,                       # number of time step for training
-        num_epochs: int,                            # number of epochs (iteration) for training
-        teacher_forcing_ratio: float = 0.99,        # teacher forcing ratio
-        resume: bool = False,                       # resume training with the latest checkpoint
+            self,
+            model: nn.Module,  # model to train
+            batch_size: int,  # batch size for experiment
+            epoch_time_step: int,  # number of time step for training
+            num_epochs: int,  # number of epochs (iteration) for training
+            teacher_forcing_ratio: float = 0.99,  # teacher forcing ratio
+            resume: bool = False,  # resume training with the latest checkpoint
     ) -> nn.Module:
         """
         Run training for a given model.
@@ -183,7 +184,7 @@ class SupervisedTrainer(object):
 
             logger.info('Epoch %d CER %0.4f' % (epoch, valid_cer))
             self._save_epoch_result(train_result=[self.train_dict, train_loss, train_cer],
-                                     valid_result=[self.valid_dict, train_loss, valid_cer])
+                                    valid_result=[self.valid_dict, train_loss, valid_cer])
             logger.info('Epoch %d Training result saved as a csv file complete !!' % epoch)
             torch.cuda.empty_cache()
 
@@ -265,6 +266,16 @@ class SupervisedTrainer(object):
             if architecture not in ('rnnt', 'conformer_t'):
                 y_hats = output.max(-1)[1]
                 cer = self.metric(targets[:, 1:], y_hats)
+                # ling_target = self.vocab.label_to_string(targets[0][1:])
+                # ling_pred = self.vocab.label_to_string(y_hats[0].cpu().detach().numpy())
+                # print('=' * 10)
+                # # print(dist/leng)
+                # # print(targets[0][1:])
+                # print(ling_target)
+                # print('*' * 10)
+                # print(ling_pred)
+                # # print(y_hats[0])
+
 
             loss.backward()
             self.optimizer.step(model)
@@ -307,7 +318,7 @@ class SupervisedTrainer(object):
                 self._save_step_result(self.train_step_result, epoch_loss_total / total_num, cer)
 
             if timestep % self.checkpoint_every == 0:
-                Checkpoint(model, self.optimizer,  self.trainset_list, self.validset, epoch).save()
+                Checkpoint(model, self.optimizer, self.trainset_list, self.validset, epoch).save()
 
             del inputs, input_lengths, targets, output, loss
 
@@ -348,11 +359,11 @@ class SupervisedTrainer(object):
                 y_hats = model.module.recognize(inputs, input_lengths)
             else:
                 y_hats = model.recognize(inputs, input_lengths)
-                
+
             for idx in range(targets.size(0)):
                 target_list.append(self.vocab.label_to_string(targets[idx]))
                 predict_list.append(self.vocab.label_to_string(y_hats[idx].cpu().detach().numpy()))
-                
+
             cer = self.metric(targets[:, 1:], y_hats)
 
         self._save_result(target_list, predict_list)
@@ -449,7 +460,7 @@ class SupervisedTrainer(object):
         }
         date_time = time.strftime('%Y_%m_%d_%H_%M_%S', time.localtime())
         save_path = f"{date_time}-valid.csv"
-        
+
         results = pd.DataFrame(results)
         results.to_csv(save_path, index=False, encoding='cp949')
 

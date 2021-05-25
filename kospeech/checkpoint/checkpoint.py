@@ -14,13 +14,14 @@
 
 import os
 import time
+
 import torch
 import torch.nn as nn
 
-from kospeech.utils import logger
 from kospeech.data import SpectrogramDataset
 from kospeech.models import ListenAttendSpell
 from kospeech.optim import Optimizer
+from kospeech.utils import logger
 
 
 class Checkpoint(object):
@@ -51,11 +52,11 @@ class Checkpoint(object):
 
     def __init__(
             self,
-            model: nn.Module = None,                   # model being trained
-            optimizer: Optimizer = None,               # stores the state of the optimizer
-            trainset_list: list = None,                # list of trainset
-            validset: SpectrogramDataset = None,       # validation dataset
-            epoch: int = None,                         # current epoch is a loop through the full training data
+            model: nn.Module = None,  # model being trained
+            optimizer: Optimizer = None,  # stores the state of the optimizer
+            trainset_list: list = None,  # list of trainset
+            validset: SpectrogramDataset = None,  # validation dataset
+            epoch: int = None,  # current epoch is a loop through the full training data
     ) -> None:
         self.model = model
         self.optimizer = optimizer
@@ -101,7 +102,8 @@ class Checkpoint(object):
             model = torch.load(os.path.join(path, self.MODEL_NAME))
 
         else:
-            resume_checkpoint = torch.load(os.path.join(path, self.TRAINER_STATE_NAME), map_location=lambda storage, loc: storage)
+            resume_checkpoint = torch.load(os.path.join(path, self.TRAINER_STATE_NAME),
+                                           map_location=lambda storage, loc: storage)
             model = torch.load(os.path.join(path, self.MODEL_NAME), map_location=lambda storage, loc: storage)
 
         if isinstance(model, ListenAttendSpell):
@@ -111,8 +113,8 @@ class Checkpoint(object):
                 model.flatten_parameters()
 
         return Checkpoint(
-            model=model, 
-            optimizer=resume_checkpoint['optimizer'], 
+            model=model,
+            optimizer=resume_checkpoint['optimizer'],
             epoch=resume_checkpoint['epoch'],
             trainset_list=resume_checkpoint['trainset_list'],
             validset=resume_checkpoint['validset'],
@@ -123,6 +125,9 @@ class Checkpoint(object):
         returns the path to the last saved checkpoint's subdirectory.
         Precondition: at least one checkpoint has been made (i.e., latest checkpoint subdirectory exists).
         """
-        checkpoints_path = sorted(os.listdir(self.LOAD_PATH), reverse=True)[0]
+        print('=' * 10)
+        print(os.getcwd())
+        print('=' * 10)
+        checkpoints_path = sorted(os.listdir(self.LOAD_PATH), reverse=True)[1]
         sorted_listdir = sorted(os.listdir(os.path.join(self.LOAD_PATH, checkpoints_path)), reverse=True)
-        return os.path.join(checkpoints_path, sorted_listdir[1])
+        return os.path.join('../../', checkpoints_path, sorted_listdir[0])

@@ -270,8 +270,10 @@ def split_dataset(config: DictConfig, transcripts_path: str, vocab: Vocabulary):
     if config.train.dataset == 'kspon':
         # train_num = 620000
         # valid_num = 2545
-        train_num = 612000
-        valid_num = 2170
+        # train_num = 612000
+        # valid_num = 2170
+        train_num = 592000
+        valid_num = 2004
     elif config.train.dataset == 'libri':
         train_num = 281241
         valid_num = 5567

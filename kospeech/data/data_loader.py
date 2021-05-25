@@ -12,17 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import math
-import threading
-import torch
+import os
 import random
+import threading
+
+import torch
 from omegaconf import DictConfig
 from torch.utils.data import Dataset
 
+from kospeech.data import SpectrogramParser
 from kospeech.data import load_dataset
 from kospeech.utils import logger
-from kospeech.data import SpectrogramParser
 from kospeech.vocabs import Vocabulary
 
 
@@ -267,8 +268,10 @@ def split_dataset(config: DictConfig, transcripts_path: str, vocab: Vocabulary):
     trainset_list = list()
 
     if config.train.dataset == 'kspon':
-        train_num = 620000
-        valid_num = 2545
+        # train_num = 620000
+        # valid_num = 2545
+        train_num = 612000
+        valid_num = 2170
     elif config.train.dataset == 'libri':
         train_num = 281241
         valid_num = 5567

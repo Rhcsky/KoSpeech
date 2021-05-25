@@ -92,6 +92,7 @@ class SupervisedTrainer(object):
         self.architecture = architecture.lower()
         self.vocab = vocab
         self.joint_ctc_attention = joint_ctc_attention
+        self.scaler = torch.cuda.amp.GradScaler()
 
         if self.joint_ctc_attention:
             self.log_format = "step: {:4d}/{:4d}, loss: {:.6f}, ctc_loss: {:.6f}, ce_loss: {:.6f}, " \
@@ -252,16 +253,16 @@ class SupervisedTrainer(object):
             input_lengths = input_lengths.to(self.device)
             target_lengths = torch.as_tensor(target_lengths).to(self.device)
 
-            model = model.to(self.device)
-            output, loss, ctc_loss, cross_entropy_loss = self._model_forward(
-                teacher_forcing_ratio=teacher_forcing_ratio,
-                inputs=inputs,
-                input_lengths=input_lengths,
-                targets=targets,
-                target_lengths=target_lengths,
-                model=model,
-                architecture=architecture,
-            )
+            with torch.cuda.amp.autocast():
+                output, loss, ctc_loss, cross_entropy_loss = self._model_forward(
+                    teacher_forcing_ratio=teacher_forcing_ratio,
+                    inputs=inputs,
+                    input_lengths=input_lengths,
+                    targets=targets,
+                    target_lengths=target_lengths,
+                    model=model,
+                    architecture=architecture,
+                )
 
             if architecture not in ('rnnt', 'conformer_t'):
                 y_hats = output.max(-1)[1]
@@ -276,9 +277,13 @@ class SupervisedTrainer(object):
                 # print(ling_pred)
                 # # print(y_hats[0])
 
+            self.scaler.scale(loss).backward()
 
-            loss.backward()
-            self.optimizer.step(model)
+            self.scaler.unscale_(self.optimizer.optimizer)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), self.optimizer.max_grad_norm)
+            self.scaler.step(self.optimizer.optimizer)
+
+            self.scaler.update()
 
             total_num += int(input_lengths.sum())
             epoch_loss_total += loss.item()

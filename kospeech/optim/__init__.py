@@ -13,9 +13,10 @@
 # limitations under the License.
 
 import torch
+
 from kospeech.optim.adamp import AdamP
-from kospeech.optim.radam import RAdam
 from kospeech.optim.novograd import Novograd
+from kospeech.optim.radam import RAdam
 
 
 class Optimizer(object):
@@ -30,6 +31,7 @@ class Optimizer(object):
         scheduler_period (int, optional): timestep with learning rate scheduler
         max_grad_norm (int, optional): value used for gradient norm clipping
     """
+
     def __init__(self, optim, scheduler=None, scheduler_period=None, max_grad_norm=0):
         self.optimizer = optim
         self.scheduler = scheduler
@@ -42,6 +44,7 @@ class Optimizer(object):
             torch.nn.utils.clip_grad_norm_(model.parameters(), self.max_grad_norm)
         self.optimizer.step()
 
+    def scheduler_step(self):
         if self.scheduler is not None:
             self.update()
             self.count += 1

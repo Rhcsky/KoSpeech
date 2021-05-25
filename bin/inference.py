@@ -13,14 +13,14 @@
 # limitations under the License.
 
 import argparse
+import os
+import sys
+
+import numpy as np
 import torch
 import torch.nn as nn
-import numpy as np
 import torchaudio
 from torch import Tensor
-
-import sys
-import os
 
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 

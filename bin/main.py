@@ -14,14 +14,14 @@
 
 import os
 import random
+import sys
 import warnings
+
+import hydra
 import torch
 import torch.nn as nn
-import hydra
 from hydra.core.config_store import ConfigStore
 from omegaconf import OmegaConf, DictConfig
-
-import sys
 
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
@@ -37,7 +37,6 @@ from kospeech.utils import (
 )
 from kospeech.vocabs import (
     KsponSpeechVocabulary,
-    LibriSpeechVocabulary,
 )
 from kospeech.data.audio import (
     FilterBankConfig,
@@ -82,8 +81,8 @@ def train(config: DictConfig) -> nn.DataParallel:
     device = check_envirionment(config.train.use_cuda)
 
     if config.train.num_threads and int(config.train.num_threads) > 0:
-       torch.set_num_threads(config.train.num_threads)
-  
+        torch.set_num_threads(config.train.num_threads)
+
     vocab = KsponSpeechVocabulary(
         f'/home/seungmin/dmount/KoSpeech/data/vocab/aihub_{config.train.output_unit}_vocabs.csv',
         output_unit=config.train.output_unit,

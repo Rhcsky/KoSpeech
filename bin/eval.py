@@ -13,19 +13,21 @@
 # limitations under the License.
 
 import os
-import hydra
 import warnings
+
+import hydra
 from hydra.core.config_store import ConfigStore
 from omegaconf import OmegaConf, DictConfig
-from kospeech.evaluator import EvalConfig
+
 from kospeech.data.audio import FilterBankConfig
+from kospeech.data.data_loader import SpectrogramDataset
+from kospeech.data.label_loader import load_dataset
+from kospeech.evaluator import EvalConfig
+from kospeech.evaluator.evaluator import Evaluator
+from kospeech.model_builder import load_test_model
+from kospeech.utils import check_envirionment, logger
 from kospeech.vocabs.ksponspeech import KsponSpeechVocabulary
 from kospeech.vocabs.librispeech import LibriSpeechVocabulary
-from kospeech.data.label_loader import load_dataset
-from kospeech.data.data_loader import SpectrogramDataset
-from kospeech.evaluator.evaluator import Evaluator
-from kospeech.utils import check_envirionment, logger
-from kospeech.model_builder import load_test_model
 
 
 def inference(config: DictConfig):
@@ -45,7 +47,7 @@ def inference(config: DictConfig):
 
     testset = SpectrogramDataset(audio_paths=audio_paths, transcripts=transcripts,
                                  sos_id=vocab.sos_id, eos_id=vocab.eos_id,
-                                 dataset_path=config.eval.dataset_path,  config=config, spec_augment=False)
+                                 dataset_path=config.eval.dataset_path, config=config, spec_augment=False)
 
     evaluator = Evaluator(
         dataset=testset,

@@ -1,4 +1,4 @@
-CUDA_DEVICE_ID='0, 1'
+CUDA_DEVICE_ID='1, 2, 3'
 DATASET_PATH='../../../dataset/kspon/KsponSpeech'
 
 CUDA_VISIBLE_DEVICES=$CUDA_DEVICE_ID \

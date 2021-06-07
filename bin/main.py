@@ -79,8 +79,12 @@ def train(config: DictConfig) -> nn.DataParallel:
     torch.manual_seed(config.train.seed)
     torch.cuda.manual_seed_all(config.train.seed)
     device = check_envirionment(config.train.use_cuda)
+<<<<<<< HEAD
 
     if config.train.num_threads and int(config.train.num_threads) > 0:
+=======
+    if hasattr(config.train, "num_threads") and int(config.train.num_threads) > 0:
+>>>>>>> aa7bef5c4b8497ebbd5414efb4795e72bfc89876
         torch.set_num_threads(config.train.num_threads)
 
     vocab = KsponSpeechVocabulary(
